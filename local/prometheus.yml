@@ -1,0 +1,108 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'multi-site-dev'
+    environment: 'development'
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Redis exporters
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+
+  # ScyllaDB metrics
+  - job_name: 'scylla-gcorp'
+    static_configs:
+      - targets: ['gcorp-scylla:9180']
+        labels:
+          site: 'gcorp'
+          service: 'scylla'
+
+  - job_name: 'scylla-journa'
+    static_configs:
+      - targets: ['journa-scylla:9180']
+        labels:
+          site: 'journa'
+          service: 'scylla'
+
+  - job_name: 'scylla-cardiani'
+    static_configs:
+      - targets: ['cardiani-scylla:9180']
+        labels:
+          site: 'cardiani'
+          service: 'scylla'
+
+  - job_name: 'scylla-zeteb'
+    static_configs:
+      - targets: ['zeteb-scylla:9180']
+        labels:
+          site: 'zeteb'
+          service: 'scylla'
+
+  # Elasticsearch
+  - job_name: 'elasticsearch'
+    static_configs:
+      - targets: ['elasticsearch:9200']
+        labels:
+          service: 'elasticsearch'
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+
+  # n8n
+  - job_name: 'n8n'
+    static_configs:
+      - targets: ['n8n:5678']
+        labels:
+          service: 'n8n'
+
+  # Application backends
+  - job_name: 'backend-gcorp'
+    static_configs:
+      - targets: ['gcorp-backend:8080']
+        labels:
+          site: 'gcorp'
+          service: 'backend'
+
+  - job_name: 'backend-journa'
+    static_configs:
+      - targets: ['journa-backend:8080']
+        labels:
+          site: 'journa'
+          service: 'backend'
+
+  - job_name: 'backend-cardiani'
+    static_configs:
+      - targets: ['cardiani-backend:8080']
+        labels:
+          site: 'cardiani'
+          service: 'backend'
+
+  - job_name: 'backend-zeteb'
+    static_configs:
+      - targets: ['zeteb-backend:8080']
+        labels:
+          site: 'zeteb'
+          service: 'backend'
+
+# Alerting rules
+rule_files:
+  - 'alerts.yml'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']

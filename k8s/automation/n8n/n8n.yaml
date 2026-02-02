@@ -1,0 +1,136 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: automation
+  labels:
+    name: automation
+    purpose: workflow-automation
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-data
+  namespace: automation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-config
+  namespace: automation
+data:
+  EXECUTIONS_PROCESS: "main"
+  EXECUTIONS_MODE: "regular"
+  WEBHOOK_URL: "http://n8n.local"
+  N8N_ENCRYPTION_KEY: "CHANGE_ME_IN_PRODUCTION"
+  DB_TYPE: "sqlite"
+  GENERIC_TIMEZONE: "Asia/Tehran"
+  TZ: "Asia/Tehran"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+  namespace: automation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      containers:
+        - name: n8n
+          image: n8nio/n8n:1.20.0
+          ports:
+            - containerPort: 5678
+          envFrom:
+            - configMapRef:
+                name: n8n-config
+          env:
+            # Internal service URLs for workflows
+            - name: GCORP_BACKEND_URL
+              value: "http://backend.gcorp:8080"
+            - name: JOURNA_BACKEND_URL
+              value: "http://backend.journa:8080"
+            - name: CARDIANI_BACKEND_URL
+              value: "http://backend.cardiani:8080"
+            - name: ZETEB_BACKEND_URL
+              value: "http://backend.zeteb:8080"
+            
+            # Database URLs
+            - name: GCORP_REDIS_URL
+              value: "redis://redis.gcorp:6379"
+            - name: JOURNA_REDIS_URL
+              value: "redis://redis.journa:6379"
+            - name: CARDIANI_REDIS_URL
+              value: "redis://redis.cardiani:6379"
+            - name: ZETEB_REDIS_URL
+              value: "redis://redis.zeteb:6379"
+            
+            # Monitoring URLs
+            - name: ELASTICSEARCH_URL
+              value: "http://elasticsearch.observability:9200"
+            - name: GRAFANA_URL
+              value: "http://grafana.observability:3000"
+          volumeMounts:
+            - name: n8n-data
+              mountPath: /home/node/.n8n
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+      volumes:
+        - name: n8n-data
+          persistentVolumeClaim:
+            claimName: n8n-data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n
+  namespace: automation
+spec:
+  selector:
+    app: n8n
+  ports:
+    - port: 5678
+      targetPort: 5678
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n-ingress
+  namespace: automation
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  rules:
+    - host: n8n.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n
+                port:
+                  number: 5678

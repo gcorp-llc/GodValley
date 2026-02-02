@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scylla-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scylla-exporter
+  template:
+    metadata:
+      labels:
+        app: scylla-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9180"
+    spec:
+      containers:
+        - name: scylla-exporter
+          image: scylladb/scylla-monitoring:4.5.4
+          args:
+            - --api-address=scylla:10000
+          ports:
+            - containerPort: 9180
+              name: metrics
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scylla-exporter
+spec:
+  selector:
+    app: scylla-exporter
+  ports:
+    - port: 9180
+      targetPort: 9180
+      name: metrics
+  type: ClusterIP

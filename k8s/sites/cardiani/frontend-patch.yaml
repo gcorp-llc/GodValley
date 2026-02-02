@@ -6,7 +6,7 @@ spec:
   template:
     metadata:
       labels:
-        site: gcorp
+        site: cardiani
     spec:
       containers:
         - name: frontend

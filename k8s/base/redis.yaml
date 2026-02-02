@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet  # تغییر از Deployment به StatefulSet
 metadata:
   name: redis
 spec:
+  serviceName: redis
   replicas: 1
   selector:
     matchLabels:
@@ -19,22 +20,19 @@ spec:
           volumeMounts:
             - name: redis-config
               mountPath: /etc/redis
+            - name: redis-data
+              mountPath: /data
           ports:
             - containerPort: 6379
       volumes:
         - name: redis-config
           configMap:
             name: redis-config
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: redis
-spec:
-  selector:
-    app: redis
-  ports:
-    - port: 6379
-      targetPort: 6379
-  type: ClusterIP
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

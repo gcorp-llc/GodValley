@@ -2,15 +2,34 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: frontend-config
+  namespace: backend
+  labels:
+    app: frontend
+    version: v1
 data:
+  # API Configuration
   NEXT_PUBLIC_API_BASE_URL: "http://backend:8080"
+  NEXT_PUBLIC_API_TIMEOUT: "30000"
+  NEXT_PUBLIC_LOG_LEVEL: "info"
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: backend-config
+  namespace: backend
+  labels:
+    app: backend
+    version: v1
 data:
+  # Server Configuration
   SERVER_HOST: "0.0.0.0"
   SERVER_PORT: "8080"
+  
+  # Logging Configuration
   RUST_LOG: "info"
+  
+  # Application Configuration
+  ENVIRONMENT: "development"
+  MAX_CONNECTIONS: "100"
+  REQUEST_TIMEOUT: "30"

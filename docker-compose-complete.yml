@@ -1,0 +1,456 @@
+version: "3.9"
+
+# ========================================
+# Multi-Site Platform - Development Stack
+# با Observability و Automation
+# ========================================
+
+networks:
+  multi-site:
+    driver: bridge
+
+volumes:
+  # Persistent volumes
+  elasticsearch-data:
+  grafana-data:
+  prometheus-data:
+  loki-data:
+  n8n-data:
+  # Database volumes
+  gcorp-redis-data:
+  gcorp-scylla-data:
+  journa-redis-data:
+  journa-scylla-data:
+  cardiani-redis-data:
+  cardiani-scylla-data:
+  zeteb-redis-data:
+  zeteb-scylla-data:
+
+services:
+
+  # ========================================
+  # GCORP Site
+  # ========================================
+  
+  gcorp-frontend:
+    build:
+      context: ../services/gcorp.cc/frontend
+      dockerfile: Dockerfile
+    container_name: gcorp-frontend
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://gcorp-backend:8080
+      NODE_ENV: development
+    networks:
+      - multi-site
+    depends_on:
+      - gcorp-backend
+    restart: unless-stopped
+
+  gcorp-backend:
+    build:
+      context: ../services/gcorp.cc/backend
+      dockerfile: Dockerfile
+    container_name: gcorp-backend
+    ports:
+      - "8081:8080"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      REDIS_HOST: gcorp-redis
+      REDIS_PORT: 6379
+      SCYLLA_HOST: gcorp-scylla
+      SCYLLA_PORT: 9042
+      RUST_LOG: info
+    networks:
+      - multi-site
+    depends_on:
+      - gcorp-redis
+      - gcorp-scylla
+    restart: unless-stopped
+
+  gcorp-redis:
+    image: redis:7.2-alpine
+    container_name: gcorp-redis
+    volumes:
+      - gcorp-redis-data:/data
+      - ../docker/redis/redis.conf:/etc/redis/redis.conf
+    command: redis-server /etc/redis/redis.conf
+    ports:
+      - "63791:6379"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  gcorp-scylla:
+    image: scylladb/scylla:6.3
+    container_name: gcorp-scylla
+    volumes:
+      - gcorp-scylla-data:/var/lib/scylla
+    command: --smp 2 --memory 2G --overprovisioned 1
+    ports:
+      - "90421:9042"
+      - "91801:9180"  # Prometheus metrics
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # JOURNA Site
+  # ========================================
+
+  journa-frontend:
+    build:
+      context: ../services/journa/frontend
+      dockerfile: Dockerfile
+    container_name: journa-frontend
+    ports:
+      - "3002:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://journa-backend:8080
+      NODE_ENV: development
+    networks:
+      - multi-site
+    depends_on:
+      - journa-backend
+    restart: unless-stopped
+
+  journa-backend:
+    build:
+      context: ../services/journa/backend
+      dockerfile: Dockerfile
+    container_name: journa-backend
+    ports:
+      - "8082:8080"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      REDIS_HOST: journa-redis
+      SCYLLA_HOST: journa-scylla
+      RUST_LOG: info
+    networks:
+      - multi-site
+    depends_on:
+      - journa-redis
+      - journa-scylla
+    restart: unless-stopped
+
+  journa-redis:
+    image: redis:7.2-alpine
+    container_name: journa-redis
+    volumes:
+      - journa-redis-data:/data
+    ports:
+      - "63792:6379"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  journa-scylla:
+    image: scylladb/scylla:6.3
+    container_name: journa-scylla
+    volumes:
+      - journa-scylla-data:/var/lib/scylla
+    command: --smp 2 --memory 2G --overprovisioned 1
+    ports:
+      - "90422:9042"
+      - "91802:9180"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # CARDIANI Site
+  # ========================================
+
+  cardiani-frontend:
+    build:
+      context: ../services/cardiani/frontend
+      dockerfile: Dockerfile
+    container_name: cardiani-frontend
+    ports:
+      - "3003:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://cardiani-backend:8080
+      NODE_ENV: development
+    networks:
+      - multi-site
+    depends_on:
+      - cardiani-backend
+    restart: unless-stopped
+
+  cardiani-backend:
+    build:
+      context: ../services/cardiani/backend
+      dockerfile: Dockerfile
+    container_name: cardiani-backend
+    ports:
+      - "8083:8080"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      REDIS_HOST: cardiani-redis
+      SCYLLA_HOST: cardiani-scylla
+      RUST_LOG: info
+    networks:
+      - multi-site
+    depends_on:
+      - cardiani-redis
+      - cardiani-scylla
+    restart: unless-stopped
+
+  cardiani-redis:
+    image: redis:7.2-alpine
+    container_name: cardiani-redis
+    volumes:
+      - cardiani-redis-data:/data
+    ports:
+      - "63793:6379"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  cardiani-scylla:
+    image: scylladb/scylla:6.3
+    container_name: cardiani-scylla
+    volumes:
+      - cardiani-scylla-data:/var/lib/scylla
+    command: --smp 2 --memory 2G --overprovisioned 1
+    ports:
+      - "90423:9042"
+      - "91803:9180"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # ZETEB Site
+  # ========================================
+
+  zeteb-frontend:
+    build:
+      context: ../services/zeteb/frontend
+      dockerfile: Dockerfile
+    container_name: zeteb-frontend
+    ports:
+      - "3004:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://zeteb-backend:8080
+      NODE_ENV: development
+    networks:
+      - multi-site
+    depends_on:
+      - zeteb-backend
+    restart: unless-stopped
+
+  zeteb-backend:
+    build:
+      context: ../services/zeteb/backend
+      dockerfile: Dockerfile
+    container_name: zeteb-backend
+    ports:
+      - "8084:8080"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      REDIS_HOST: zeteb-redis
+      SCYLLA_HOST: zeteb-scylla
+      RUST_LOG: info
+    networks:
+      - multi-site
+    depends_on:
+      - zeteb-redis
+      - zeteb-scylla
+    restart: unless-stopped
+
+  zeteb-redis:
+    image: redis:7.2-alpine
+    container_name: zeteb-redis
+    volumes:
+      - zeteb-redis-data:/data
+    ports:
+      - "63794:6379"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  zeteb-scylla:
+    image: scylladb/scylla:6.3
+    container_name: zeteb-scylla
+    volumes:
+      - zeteb-scylla-data:/var/lib/scylla
+    command: --smp 2 --memory 2G --overprovisioned 1
+    ports:
+      - "90424:9042"
+      - "91804:9180"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # OBSERVABILITY STACK
+  # ========================================
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - multi-site
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.3
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    networks:
+      - multi-site
+    depends_on:
+      - elasticsearch
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:v2.48.1
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=15d'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=redis-datasource,scylladb-scylla-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+      - "3000:3000"
+    networks:
+      - multi-site
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:2.9.3
+    container_name: loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki-data:/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.3
+    container_name: promtail
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - multi-site
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  # ========================================
+  # MONITORING EXPORTERS
+  # ========================================
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.55.0
+    container_name: redis-exporter
+    environment:
+      - REDIS_ADDR=redis://gcorp-redis:6379,redis://journa-redis:6379,redis://cardiani-redis:6379,redis://zeteb-redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # AUTOMATION
+  # ========================================
+
+  n8n:
+    image: n8nio/n8n:1.20.0
+    container_name: n8n
+    environment:
+      - EXECUTIONS_PROCESS=main
+      - EXECUTIONS_MODE=regular
+      - WEBHOOK_URL=http://localhost:5678
+      - N8N_ENCRYPTION_KEY=CHANGE_ME_IN_PRODUCTION
+      - DB_TYPE=sqlite
+      - GENERIC_TIMEZONE=Asia/Tehran
+      - TZ=Asia/Tehran
+      # Service URLs
+      - GCORP_BACKEND_URL=http://gcorp-backend:8080
+      - JOURNA_BACKEND_URL=http://journa-backend:8080
+      - CARDIANI_BACKEND_URL=http://cardiani-backend:8080
+      - ZETEB_BACKEND_URL=http://zeteb-backend:8080
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - GRAFANA_URL=http://grafana:3000
+    volumes:
+      - n8n-data:/home/node/.n8n
+    ports:
+      - "5678:5678"
+    networks:
+      - multi-site
+    restart: unless-stopped
+
+  # ========================================
+  # MANAGEMENT TOOLS
+  # ========================================
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    environment:
+      - REDIS_HOSTS=gcorp:gcorp-redis:6379,journa:journa-redis:6379,cardiani:cardiani-redis:6379,zeteb:zeteb-redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - multi-site
+    restart: unless-stopped
