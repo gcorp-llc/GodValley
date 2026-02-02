@@ -1,0 +1,101 @@
+version: "3.9"
+
+services:
+
+  # =======================
+  # Frontend
+  # =======================
+  gcorp-frontend:
+    build: ../services/gcorp.cc/frontend
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://gcorp-backend:8080
+
+  gcorp-backend:
+    build: ../services/gcorp.cc/backend
+    ports:
+      - "8081:8080"
+    environment:
+      REDIS_HOST: gcorp-redis
+      SCYLLA_HOST: gcorp-scylla
+
+  gcorp-redis:
+    image: redis:7.2-alpine
+    volumes:
+      - ../../databases/gcorp/redis-data:/data
+    ports:
+      - "63791:6379"
+
+  gcorp-scylla:
+    image: scylladb/scylla:6.3
+    volumes:
+      - ../../databases/gcorp/scylla-data:/var/lib/scylla
+    ports:
+      - "90421:9042"
+
+# مشابه همین ساختار برای دیگر سایت‌ها
+  journa-frontend:
+    build: ../services/journa.ir/frontend
+    ports:
+      - "3002:3000"
+  journa-backend:
+    build: ../services/journa.ir/backend
+    ports:
+      - "8082:8080"
+  journa-redis:
+    image: redis:7.2-alpine
+    volumes:
+      - ../../databases/journa/redis-data:/data
+    ports:
+      - "63792:6379"
+  journa-scylla:
+    image: scylladb/scylla:6.3
+    volumes:
+      - ../../databases/journa/scylla-data:/var/lib/scylla
+    ports:
+      - "90422:9042"
+
+# Cardiani
+  cardiani-frontend:
+    build: ../services/cardiani.ir/frontend
+    ports:
+      - "3003:3000"
+  cardiani-backend:
+    build: ../services/cardiani.ir/backend
+    ports:
+      - "8083:8080"
+  cardiani-redis:
+    image: redis:7.2-alpine
+    volumes:
+      - ../../databases/cardiani/redis-data:/data
+    ports:
+      - "63793:6379"
+  cardiani-scylla:
+    image: scylladb/scylla:6.3
+    volumes:
+      - ../../databases/cardiani/scylla-data:/var/lib/scylla
+    ports:
+      - "90423:9042"
+
+# Zeteb
+  zeteb-frontend:
+    build: ../services/zeteb.ir/frontend
+    ports:
+      - "3004:3000"
+  zeteb-backend:
+    build: ../services/zeteb.ir/backend
+    ports:
+      - "8084:8080"
+  zeteb-redis:
+    image: redis:7.2-alpine
+    volumes:
+      - ../../databases/zeteb/redis-data:/data
+    ports:
+      - "63794:6379"
+  zeteb-scylla:
+    image: scylladb/scylla:6.3
+    volumes:
+      - ../../databases/zeteb/scylla-data:/var/lib/scylla
+    ports:
+      - "90424:9042"

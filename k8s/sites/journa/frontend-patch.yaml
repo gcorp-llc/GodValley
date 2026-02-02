@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  template:
+    metadata:
+      labels:
+        site: gcorp
+    spec:
+      containers:
+        - name: frontend
+          image: multi/frontend-nextjs:latest
+          env:
+            - name: NEXT_PUBLIC_API_BASE_URL
+              value: "http://backend:8080"

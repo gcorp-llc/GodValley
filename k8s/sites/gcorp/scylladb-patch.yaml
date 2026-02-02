@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: scylla
+spec:
+  serviceName: scylla
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        site: gcorp
+    spec:
+      containers:
+        - name: scylla
+          image: scylladb/scylla:6.3
+          ports:
+            - containerPort: 9042

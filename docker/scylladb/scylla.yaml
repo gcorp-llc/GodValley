@@ -1,0 +1,29 @@
+cluster_name: "scylla-cluster"
+num_tokens: 256
+
+listen_address: 0.0.0.0
+rpc_address: 0.0.0.0
+
+endpoint_snitch: SimpleSnitch
+
+seed_provider:
+  - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+    parameters:
+      - seeds: "scylladb"
+
+commitlog_sync: periodic
+commitlog_sync_period_in_ms: 10000
+
+memtable_flush_writers: 2
+
+concurrent_reads: 32
+concurrent_writes: 32
+
+authenticator: PasswordAuthenticator
+authorizer: CassandraAuthorizer
+
+enable_sasi_indexes: true
+
+experimental_features:
+  - udf
+  - alternator-streams
