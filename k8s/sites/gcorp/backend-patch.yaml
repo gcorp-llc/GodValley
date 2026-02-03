@@ -7,16 +7,20 @@ spec:
     metadata:
       labels:
         site: gcorp
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: backend
-          image: multi/backend-actix:latest
+          image: multi/gcorp-api:latest
           env:
             - name: SERVER_HOST
               value: "0.0.0.0"
-            - name: SERVER_PORT
+            - name: PORT
               value: "8080"
-            - name: REDIS_HOST
-              value: "redis"
-            - name: SCYLLA_HOST
-              value: "scylla"
+            - name: REDIS_URI
+              value: "redis://redis:6379"
+            - name: SCYLLA_URI
+              value: "scylla:9042"

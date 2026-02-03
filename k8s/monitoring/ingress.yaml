@@ -1,26 +1,19 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: zeteb-ingress
-  namespace: zeteb
+  name: grafana-ingress
+  namespace: monitoring
   annotations:
     kubernetes.io/ingress.class: nginx
 spec:
   rules:
-    - host: zeteb.local
+    - host: grafana.local
       http:
         paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: grafana
                 port:
                   number: 3000

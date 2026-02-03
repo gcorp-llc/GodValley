@@ -1,9 +1,76 @@
-name: CI
-on: [push]
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  build:
+  test-rust:
+    name: Test Rust
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --workspace
+
+  build-frontend:
+    name: Build Frontends
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: [gcorp.cc, cardiani, journa, zeteb]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: services/${{ matrix.site }}/web/package.json
+      - name: Install dependencies
+        run: |
+          cd services/${{ matrix.site }}/web
+          npm install
       - name: Build
-        run: echo "Building..."
+        run: |
+          cd services/${{ matrix.site }}/web
+          npm run build
+
+  docker-build:
+    name: Docker Build Verify
+    needs: [test-rust, build-frontend]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: [gcorp, cardiani, journa, zeteb]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API Image
+        run: |
+          site=${{ matrix.site }}
+          path="services/$site"
+          if [ "$site" == "gcorp" ]; then path="services/gcorp.cc"; fi
+          docker build \
+            --build-arg APP_PATH=$path/apps/api \
+            --build-arg APP_NAME=$site-api \
+            -t multi/$site-api:latest \
+            -f docker/backend-actix/Dockerfile .
+
+      - name: Build Web Image
+        run: |
+          site=${{ matrix.site }}
+          path="services/$site"
+          if [ "$site" == "gcorp" ]; then path="services/gcorp.cc"; fi
+          docker build \
+            -t multi/$site-web:latest \
+            $path/web \
+            -f docker/frontend-nextjs/Dockerfile
