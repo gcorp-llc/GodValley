@@ -35,3 +35,28 @@ This repository contains a professional multi-site, multi-service platform.
    ```bash
    make deploy
    ```
+
+## 🛠️ Technical Details
+
+### Backend (Rust)
+- **Framework**: Actix-web 4.x
+- **Logging**: Tracing with JSON formatting for production.
+- **Metrics**: Prometheus integration via `/metrics` endpoint.
+- **Workspaces**: Common logic is shared through local crates in `libs/`.
+
+### Frontend (Next.js)
+- **Framework**: Next.js 14 (App Router)
+- **Styling**: Tailwind CSS
+- **Deployment**: Standalone build mode for minimal Docker image size.
+
+### Infrastructure
+- **Ingress**: Nginx Ingress Controller routing based on hostnames.
+- **Monitoring**: Prometheus scrapes all pods annotated with `prometheus.io/scrape`. Grafana is available for visualization.
+- **Database**: Dedicated ScyllaDB and Redis instances per site for maximum isolation.
+
+## 🤝 Contributing
+
+1. Create a feature branch.
+2. Ensure `cargo check --workspace` passes.
+3. Ensure all Next.js apps build successfully.
+4. Submit a Pull Request.
