@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "libs/*",
+    "services/gcorp.cc/apps/*",
+    "services/cardiani/apps/*",
+    "services/journa/apps/*",
+    "services/zeteb/apps/*",
+]
+resolver = "2"

@@ -6,11 +6,8 @@ spec:
   template:
     metadata:
       labels:
-        site: gcorp
+        site: journa
     spec:
       containers:
         - name: frontend
-          image: multi/frontend-nextjs:latest
-          env:
-            - name: NEXT_PUBLIC_API_BASE_URL
-              value: "http://backend:8080"
+          image: multi/journa-web:latest
