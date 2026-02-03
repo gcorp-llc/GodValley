@@ -1,0 +1,12 @@
+[package]
+name = "common-db"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+scylla = "0.12"
+redis = { version = "0.25", features = ["tokio-comp", "json"] }
+tokio = { version = "1", features = ["full"] }
+common-utils = { path = "../common-utils" }
+async-trait = "0.1"
+tracing = "0.1"
