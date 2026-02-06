@@ -5,5 +5,6 @@ members = [
     "services/cardiani/apps/*",
     "services/journa/apps/*",
     "services/zeteb/apps/*",
+    "services/godvalley/apps/*",
 ]
 resolver = "2"
