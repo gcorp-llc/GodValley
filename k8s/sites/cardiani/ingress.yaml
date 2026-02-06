@@ -4,7 +4,7 @@ metadata:
   name: cardiani-ingress
   namespace: cardiani
   annotations:
-    kubernetes.io/ingress.class: nginx
+    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
     - host: cardiani.local

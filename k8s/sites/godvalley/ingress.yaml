@@ -1,22 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: journa-ingress
-  namespace: journa
+  name: godvalley-ingress
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: journa.local
+    - host: godvalley.local
       http:
         paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: backend
-                port:
-                  number: 8080
           - path: /
             pathType: Prefix
             backend:
@@ -24,3 +16,10 @@ spec:
                 name: frontend
                 port:
                   number: 3000
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080

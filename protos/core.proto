@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package core;
+
+service CoreService {
+  rpc HealthCheck (HealthCheckRequest) returns (HealthCheckResponse);
+  rpc GetData (GetDataRequest) returns (GetDataResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string message = 2;
+}
+
+message GetDataRequest {
+  string id = 1;
+}
+
+message GetDataResponse {
+  string id = 1;
+  string value = 2;
+}

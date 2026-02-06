@@ -1,0 +1,20 @@
+[package]
+name = "godvalley-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-cors = "0.7"
+actix-web-prometheus = "0.1"
+tonic = "0.12"
+tokio = { version = "1", features = ["full"] }
+scylla = "0.15"
+common-proto = { path = "../../../../libs/common-proto" }
+common-utils = { path = "../../../../libs/common-utils" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+prometheus = "0.13"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+futures = "0.3"

@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 
-SITES := gcorp cardiani journa zeteb
+SITES := godvalley gcorp cardiani journa zeteb
 
 ## -----------------------------
 ## Core
@@ -23,11 +23,11 @@ help:
 init:
 	kubectl apply -f k8s/namespaces/
 	kubectl apply -f k8s/monitoring/
-	kubectl apply -f k8s/ingress/ingress-nginx-install.yaml
-	@echo "Waiting for ingress controller..."
-	kubectl wait --namespace ingress-nginx \
+	kubectl apply -f k8s/ingress/traefik-install.yaml
+	@echo "Waiting for Traefik ingress controller..."
+	kubectl wait --namespace kube-system \
 		--for=condition=ready pod \
-		--selector=app.kubernetes.io/component=controller \
+		--selector=app=traefik \
 		--timeout=120s
 
 ## -----------------------------
