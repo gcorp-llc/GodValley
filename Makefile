@@ -41,10 +41,18 @@ build-backend:
 		echo "Building $$site backend..."; \
 		service_dir="services/$$site"; \
 		backend_path="$$service_dir/apps/api"; \
+		app_name="$$site-api"; \
 		image_name="multi/$$site-api:latest"; \
 		[ "$$site" == "gcorp" ] && service_dir="services/gcorp.cc" && backend_path="$$service_dir/apps/api"; \
-		[ "$$site" == "godvalley" ] && backend_path="$$service_dir/apps/core" && image_name="multi/$$site-core:latest"; \
-		docker build -t $$image_name -f $$backend_path/Dockerfile . ; \
+		if [ "$$site" == "godvalley" ]; then \
+			backend_path="$$service_dir/apps/core"; \
+			app_name="godvalley-core"; \
+			image_name="multi/godvalley-core:latest"; \
+		fi; \
+		docker build \
+			--build-arg APP_PATH=$$backend_path \
+			--build-arg APP_NAME=$$app_name \
+			-t $$image_name -f docker/backend-actix/Dockerfile . ; \
 	done
 
 build-frontend:
@@ -52,7 +60,7 @@ build-frontend:
 		echo "Building $$site frontend..."; \
 		service_dir="services/$$site"; \
 		[ "$$site" == "gcorp" ] && service_dir="services/gcorp.cc"; \
-		docker build -t multi/$$site-web:latest $$service_dir/web -f $$service_dir/web/Dockerfile ; \
+		docker build -t multi/$$site-web:latest $$service_dir/web -f docker/frontend-nextjs/Dockerfile ; \
 	done
 
 ## -----------------------------
