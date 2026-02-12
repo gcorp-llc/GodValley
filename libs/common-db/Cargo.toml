@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-scylla = "0.12"
-redis = { version = "0.25", features = ["tokio-comp", "json"] }
-tokio = { version = "1", features = ["full"] }
+scylla = "1.5.0"
+redis = { version = "1.0.3", features = ["tokio-comp", "json"] }
+tokio = { version = "1.49.0", features = ["full"] }
 common-utils = { path = "../common-utils" }
-async-trait = "0.1"
-tracing = "0.1"
+async-trait = "0.1.86"
+tracing = "0.1.44"

@@ -1,4 +1,4 @@
-use scylla::Session;
+use scylla::client::session::Session;
 use std::sync::Arc;
 
 pub struct AppState {

@@ -1,6 +1,7 @@
 {
   "name": "godvalley",
   "private": true,
+  "packageManager": "npm@11.7.0",
   "workspaces": [
     "services/*/web"
   ],
@@ -11,6 +12,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "turbo": "latest"
+    "turbo": "2.8.7"
   }
 }

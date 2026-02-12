@@ -1,7 +1,7 @@
 # =========================
 # Stage 1: Builder
 # =========================
-FROM node:25-alpine AS builder
+FROM node:25.6-alpine AS builder
 
 WORKDIR /app
 
@@ -22,7 +22,7 @@ RUN npm run build
 # =========================
 # Stage 2: Runner
 # =========================
-FROM node:25-alpine AS runner
+FROM node:25.6-alpine AS runner
 
 WORKDIR /app
 
