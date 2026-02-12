@@ -11,31 +11,36 @@ spec:
     metadata:
       labels:
         app: frontend
-  spec:
-  containers:
-    - name: frontend
-      image: multi/frontend-nextjs:latest
-      resources:
-        requests:
-          memory: "512Mi"
-          cpu: "250m"
-        limits:
-          memory: "1Gi"
-          cpu: "500m"
-      ports:
-        - containerPort: 3000
-      livenessProbe:
-        httpGet:
-          path: /
-          port: 3000
-        initialDelaySeconds: 30
-        periodSeconds: 10
-      readinessProbe:
-        httpGet:
-          path: /
-          port: 3000
-        initialDelaySeconds: 5
-        periodSeconds: 5
+    spec:
+      containers:
+        - name: frontend
+          image: multi/frontend-nextjs:latest
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+            - secretRef:
+                name: frontend-secret
 
 ---
 apiVersion: v1

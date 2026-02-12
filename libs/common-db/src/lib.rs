@@ -12,6 +12,16 @@ pub mod scylla {
             .await?;
         Ok(session)
     }
+
+    pub async fn setup_keyspace(session: &Session, keyspace: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let query = format!(
+            "CREATE KEYSPACE IF NOT EXISTS {} WITH REPLICATION = {{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }}",
+            keyspace
+        );
+        session.query(query, ()).await?;
+        info!("Keyspace {} ensured", keyspace);
+        Ok(())
+    }
 }
 
 pub mod redis_db {

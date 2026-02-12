@@ -2,16 +2,18 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 
+SITES := gcorp cardiani journa zeteb
+
 ## -----------------------------
 ## Core
 ## -----------------------------
 
 help:
 	@echo "Available commands:"
-	@echo "  make init           Initialize cluster (ingress, namespaces)"
-	@echo "  make build          Build all Docker images"
+	@echo "  make init           Initialize cluster (ingress, namespaces, monitoring)"
+	@echo "  make build          Build all Docker images for all sites"
 	@echo "  make deploy         Deploy all sites to Kubernetes"
-	@echo "  make destroy        Remove all deployments"
+	@echo "  make destroy        Remove all deployments and namespaces"
 	@echo "  make status         Show cluster status"
 
 ## -----------------------------
@@ -20,7 +22,9 @@ help:
 
 init:
 	kubectl apply -f k8s/namespaces/
+	kubectl apply -f k8s/monitoring/
 	kubectl apply -f k8s/ingress/ingress-nginx-install.yaml
+	@echo "Waiting for ingress controller..."
 	kubectl wait --namespace ingress-nginx \
 		--for=condition=ready pod \
 		--selector=app.kubernetes.io/component=controller \
@@ -30,36 +34,55 @@ init:
 ## Build Images
 ## -----------------------------
 
-build:
-	docker build -t multi/frontend-nextjs:latest docker/frontend-nextjs
-	docker build -t multi/backend-actix:latest docker/backend-actix
+build: build-backend build-frontend
+
+build-backend:
+	@for site in $(SITES); do \
+		echo "Building $$site-api..."; \
+		path="services/$$site"; \
+		[ "$$site" == "gcorp" ] && path="services/gcorp.cc"; \
+		docker build --build-arg APP_PATH=$$path/apps/api --build-arg APP_NAME=$$site-api -t multi/$$site-api:latest -f docker/backend-actix/Dockerfile . ; \
+	done
+
+build-frontend:
+	@for site in $(SITES); do \
+		echo "Building $$site-web..."; \
+		path="services/$$site"; \
+		[ "$$site" == "gcorp" ] && path="services/gcorp.cc"; \
+		docker build -t multi/$$site-web:latest $$path/web -f docker/frontend-nextjs/Dockerfile ; \
+	done
 
 ## -----------------------------
 ## Deploy
 ## -----------------------------
 
 deploy:
-	kubectl apply -k k8s/sites/gcorp
-	kubectl apply -k k8s/sites/journa
-	kubectl apply -k k8s/sites/cardiani
-	kubectl apply -k k8s/sites/zeteb
+	@for site in $(SITES); do \
+		echo "Deploying $$site..."; \
+		kubectl apply -k k8s/sites/$$site; \
+	done
 
 ## -----------------------------
 ## Destroy
 ## -----------------------------
 
 destroy:
-	kubectl delete -k k8s/sites/gcorp || true
-	kubectl delete -k k8s/sites/journa || true
-	kubectl delete -k k8s/sites/cardiani || true
-	kubectl delete -k k8s/sites/zeteb || true
+	@for site in $(SITES); do \
+		kubectl delete -k k8s/sites/$$site --ignore-not-found=true; \
+	done
+	kubectl delete -f k8s/monitoring/ --ignore-not-found=true
+	kubectl delete -f k8s/namespaces/ --ignore-not-found=true
 
 ## -----------------------------
 ## Status
 ## -----------------------------
 
 status:
+	@echo "--- Nodes ---"
 	kubectl get nodes
+	@echo "--- Pods ---"
 	kubectl get pods -A
+	@echo "--- Services ---"
 	kubectl get svc -A
+	@echo "--- Ingress ---"
 	kubectl get ingress -A
