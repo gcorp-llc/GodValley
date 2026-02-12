@@ -1,7 +1,7 @@
 # =========================
 # Stage 1: Builder
 # =========================
-FROM rust:1.93-slim AS builder
+FROM rust:1.93.1-slim AS builder
 
 # These arguments are passed from the build command (Makefile or CI)
 ARG APP_NAME

@@ -2,7 +2,8 @@ use actix_web::{web, App, HttpServer};
 use actix_cors::Cors;
 use tonic::transport::Server;
 use common_proto::core::core_service_server::CoreServiceServer;
-use scylla::SessionBuilder;
+use scylla::client::session_builder::SessionBuilder;
+use scylla::client::session::Session;
 use std::sync::Arc;
 use std::env;
 use common_utils::init_logger;
@@ -21,7 +22,7 @@ async fn main() -> std::io::Result<()> {
     let scylla_uri = env::var("SCYLLA_URI").unwrap_or_else(|_| "scylla:9042".to_string());
 
     // Initialize ScyllaDB
-    let session = SessionBuilder::new()
+    let session: Session = SessionBuilder::new()
         .known_node(scylla_uri)
         .build()
         .await

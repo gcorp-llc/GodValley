@@ -1,5 +1,6 @@
 pub mod scylla {
-    use scylla::{Session, SessionBuilder};
+    use scylla::client::session::Session;
+    use scylla::client::session_builder::SessionBuilder;
     use std::env;
     use tracing::info;
 
@@ -18,7 +19,7 @@ pub mod scylla {
             "CREATE KEYSPACE IF NOT EXISTS {} WITH REPLICATION = {{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }}",
             keyspace
         );
-        session.query(query, ()).await?;
+        session.query_unpaged(query, ()).await?;
         info!("Keyspace {} ensured", keyspace);
         Ok(())
     }
