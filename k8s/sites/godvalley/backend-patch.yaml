@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: backend
+          image: multi/godvalley-core:latest
+          env:
+            - name: SCYLLA_URI
+              value: "scylla:9042"
+            - name: PORT
+              value: "8080"
