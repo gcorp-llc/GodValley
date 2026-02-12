@@ -17,7 +17,11 @@ COPY . .
 
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+RUN npm run build && \
+    # Ensure public directory exists
+    mkdir -p public && \
+    # Ensure at least one config file exists for the COPY command
+    if [ ! -f next.config.js ] && [ ! -f next.config.mjs ]; then touch next.config.js; fi
 
 # =========================
 # Stage 2: Runner
@@ -34,7 +38,7 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/next.config.js* /app/next.config.mjs* ./
 
 EXPOSE 3000
 
