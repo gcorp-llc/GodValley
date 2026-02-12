@@ -38,18 +38,21 @@ build: build-backend build-frontend
 
 build-backend:
 	@for site in $(SITES); do \
-		echo "Building $$site-api..."; \
-		path="services/$$site"; \
-		[ "$$site" == "gcorp" ] && path="services/gcorp.cc"; \
-		docker build --build-arg APP_PATH=$$path/apps/api --build-arg APP_NAME=$$site-api -t multi/$$site-api:latest -f docker/backend-actix/Dockerfile . ; \
+		echo "Building $$site backend..."; \
+		service_dir="services/$$site"; \
+		backend_path="$$service_dir/apps/api"; \
+		image_name="multi/$$site-api:latest"; \
+		[ "$$site" == "gcorp" ] && service_dir="services/gcorp.cc" && backend_path="$$service_dir/apps/api"; \
+		[ "$$site" == "godvalley" ] && backend_path="$$service_dir/apps/core" && image_name="multi/$$site-core:latest"; \
+		docker build -t $$image_name -f $$backend_path/Dockerfile . ; \
 	done
 
 build-frontend:
 	@for site in $(SITES); do \
-		echo "Building $$site-web..."; \
-		path="services/$$site"; \
-		[ "$$site" == "gcorp" ] && path="services/gcorp.cc"; \
-		docker build -t multi/$$site-web:latest $$path/web -f docker/frontend-nextjs/Dockerfile ; \
+		echo "Building $$site frontend..."; \
+		service_dir="services/$$site"; \
+		[ "$$site" == "gcorp" ] && service_dir="services/gcorp.cc"; \
+		docker build -t multi/$$site-web:latest $$service_dir/web -f $$service_dir/web/Dockerfile ; \
 	done
 
 ## -----------------------------

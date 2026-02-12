@@ -1,101 +1,110 @@
 version: "3.9"
 
 services:
+  godvalley-web:
+    build:
+      context: ../services/godvalley/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    depends_on:
+      - godvalley-core
 
-  # =======================
-  # Frontend
-  # =======================
-  gcorp-frontend:
-    build: ../services/gcorp.cc/frontend
+  godvalley-core:
+    build:
+      context: ..
+      dockerfile: services/godvalley/apps/core/Dockerfile
+    ports:
+      - "8080:8080"
+      - "50051:50051"
+    environment:
+      RUST_LOG: info
+      REDIS_HOST: godvalley-redis
+      SCYLLA_HOST: godvalley-scylla
+    depends_on:
+      - godvalley-redis
+      - godvalley-scylla
+
+  godvalley-redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - godvalley-redis-data:/data
+
+  godvalley-scylla:
+    image: scylladb/scylla:6.3
+    ports:
+      - "9042:9042"
+    volumes:
+      - godvalley-scylla-data:/var/lib/scylla
+
+  gcorp-web:
+    build:
+      context: ../services/gcorp.cc/web
+      dockerfile: Dockerfile
     ports:
       - "3001:3000"
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://gcorp-backend:8080
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8081
 
-  gcorp-backend:
-    build: ../services/gcorp.cc/backend
+  gcorp-api:
+    build:
+      context: ..
+      dockerfile: services/gcorp.cc/apps/api/Dockerfile
     ports:
       - "8081:8080"
-    environment:
-      REDIS_HOST: gcorp-redis
-      SCYLLA_HOST: gcorp-scylla
 
-  gcorp-redis:
-    image: redis:7.2-alpine
-    volumes:
-      - ../../databases/gcorp/redis-data:/data
-    ports:
-      - "63791:6379"
-
-  gcorp-scylla:
-    image: scylladb/scylla:6.3
-    volumes:
-      - ../../databases/gcorp/scylla-data:/var/lib/scylla
-    ports:
-      - "90421:9042"
-
-# مشابه همین ساختار برای دیگر سایت‌ها
-  journa-frontend:
-    build: ../services/journa.ir/frontend
+  journa-web:
+    build:
+      context: ../services/journa/web
+      dockerfile: Dockerfile
     ports:
       - "3002:3000"
-  journa-backend:
-    build: ../services/journa.ir/backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8082
+
+  journa-api:
+    build:
+      context: ..
+      dockerfile: services/journa/apps/api/Dockerfile
     ports:
       - "8082:8080"
-  journa-redis:
-    image: redis:7.2-alpine
-    volumes:
-      - ../../databases/journa/redis-data:/data
-    ports:
-      - "63792:6379"
-  journa-scylla:
-    image: scylladb/scylla:6.3
-    volumes:
-      - ../../databases/journa/scylla-data:/var/lib/scylla
-    ports:
-      - "90422:9042"
 
-# Cardiani
-  cardiani-frontend:
-    build: ../services/cardiani.ir/frontend
+  cardiani-web:
+    build:
+      context: ../services/cardiani/web
+      dockerfile: Dockerfile
     ports:
       - "3003:3000"
-  cardiani-backend:
-    build: ../services/cardiani.ir/backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8083
+
+  cardiani-api:
+    build:
+      context: ..
+      dockerfile: services/cardiani/apps/api/Dockerfile
     ports:
       - "8083:8080"
-  cardiani-redis:
-    image: redis:7.2-alpine
-    volumes:
-      - ../../databases/cardiani/redis-data:/data
-    ports:
-      - "63793:6379"
-  cardiani-scylla:
-    image: scylladb/scylla:6.3
-    volumes:
-      - ../../databases/cardiani/scylla-data:/var/lib/scylla
-    ports:
-      - "90423:9042"
 
-# Zeteb
-  zeteb-frontend:
-    build: ../services/zeteb.ir/frontend
+  zeteb-web:
+    build:
+      context: ../services/zeteb/web
+      dockerfile: Dockerfile
     ports:
       - "3004:3000"
-  zeteb-backend:
-    build: ../services/zeteb.ir/backend
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8084
+
+  zeteb-api:
+    build:
+      context: ..
+      dockerfile: services/zeteb/apps/api/Dockerfile
     ports:
       - "8084:8080"
-  zeteb-redis:
-    image: redis:7.2-alpine
-    volumes:
-      - ../../databases/zeteb/redis-data:/data
-    ports:
-      - "63794:6379"
-  zeteb-scylla:
-    image: scylladb/scylla:6.3
-    volumes:
-      - ../../databases/zeteb/scylla-data:/var/lib/scylla
-    ports:
-      - "90424:9042"
+
+volumes:
+  godvalley-redis-data:
+  godvalley-scylla-data:
