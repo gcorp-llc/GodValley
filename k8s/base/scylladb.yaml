@@ -12,68 +12,56 @@ spec:
     metadata:
       labels:
         app: scylla
-<<<<<<< HEAD
-  spec:
-  containers:
-    - name: scylla
-      image: scylladb/scylla:6.3
-      resources:
-        requests:
-          memory: "2Gi"
-          cpu: "1000m"
-        limits:
-          memory: "4Gi"
-          cpu: "2000m"
-      args:
-        - --smp=2
-        - --memory=2G
-        - --overprovisioned=1
-        - --api-address=0.0.0.0
-      ports:
-        - containerPort: 9042
-          name: cql
-        - containerPort: 9180
-          name: prometheus
-        - containerPort: 10000
-          name: rest-api
-      env:
-        - name: SCYLLA_CLUSTER_NAME
-          value: "multi-site-cluster"
-      volumeMounts:
-        - name: scylla-data
-          mountPath: /var/lib/scylla
-        - name: scylla-config
-          mountPath: /etc/scylla
-      livenessProbe:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - nodetool status | grep -E "^UN"
-        initialDelaySeconds: 90
-        periodSeconds: 30
-      readinessProbe:
-        exec:
-          command:
-            - /bin/sh
-            - -c
-            - nodetool status | grep -E "^UN"
-        initialDelaySeconds: 60
-        periodSeconds: 10
-=======
     spec:
       containers:
         - name: scylla
           image: scylladb/scylla:6.3
-          args: ["--seeds", "scylla-0.scylla-headless"]
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          args:
+            - --smp=2
+            - --memory=2G
+            - --overprovisioned=1
+            - --api-address=0.0.0.0
+            - --seeds=scylla-0.scylla-headless
           ports:
             - containerPort: 9042
+              name: cql
             - containerPort: 7000
+              name: gossip
             - containerPort: 7001
+              name: gossip-ssl
+            - containerPort: 9180
+              name: prometheus
             - containerPort: 10000
+              name: rest-api
+          env:
+            - name: SCYLLA_CLUSTER_NAME
+              value: "multi-site-cluster"
           volumeMounts:
             - name: scylla-data
               mountPath: /var/lib/scylla
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - nodetool status | grep -E "^UN"
+            initialDelaySeconds: 90
+            periodSeconds: 30
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - nodetool status | grep -E "^UN"
+            initialDelaySeconds: 60
+            periodSeconds: 10
   volumeClaimTemplates:
     - metadata:
         name: scylla-data
@@ -82,7 +70,6 @@ spec:
         resources:
           requests:
             storage: 2Gi
->>>>>>> 4159b8fc2d33391900f55a186b0901ebcd940baa
 
 ---
 apiVersion: v1

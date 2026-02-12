@@ -1,19 +1,10 @@
 apiVersion: apps/v1
-<<<<<<< HEAD
-kind: StatefulSet  # تغییر از Deployment به StatefulSet
-metadata:
-  name: redis
-spec:
-  serviceName: redis
-  replicas: 1
-=======
 kind: StatefulSet
 metadata:
   name: redis
 spec:
   serviceName: redis-headless
   replicas: 3
->>>>>>> 4159b8fc2d33391900f55a186b0901ebcd940baa
   selector:
     matchLabels:
       app: redis
@@ -25,20 +16,6 @@ spec:
       containers:
         - name: redis
           image: redis:7.2-alpine
-<<<<<<< HEAD
-          command: ["redis-server", "/etc/redis/redis.conf"]
-          volumeMounts:
-            - name: redis-config
-              mountPath: /etc/redis
-            - name: redis-data
-              mountPath: /data
-          ports:
-            - containerPort: 6379
-      volumes:
-        - name: redis-config
-          configMap:
-            name: redis-config
-=======
           command: ["redis-server"]
           args: ["--cluster-enabled", "yes", "--cluster-config-file", "/data/nodes.conf", "--cluster-node-timeout", "5000", "--appendonly", "yes"]
           ports:
@@ -49,7 +26,6 @@ spec:
           volumeMounts:
             - name: redis-data
               mountPath: /data
->>>>>>> 4159b8fc2d33391900f55a186b0901ebcd940baa
   volumeClaimTemplates:
     - metadata:
         name: redis-data
@@ -57,9 +33,6 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-<<<<<<< HEAD
-            storage: 1Gi
-=======
             storage: 1Gi
 
 ---
@@ -86,4 +59,3 @@ spec:
     - port: 6379
       targetPort: 6379
   type: ClusterIP
->>>>>>> 4159b8fc2d33391900f55a186b0901ebcd940baa
