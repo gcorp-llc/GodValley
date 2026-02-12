@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: scylla
-          image: scylladb/scylla:2025.3
+          image: scylladb/scylla:2025.1
           resources:
             requests:
               memory: "2Gi"
