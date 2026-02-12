@@ -30,6 +30,7 @@
 3. **تنظیم فرانت‌ا‌ند (Next.js)**:
    - پروژه Next.js خود را در `services/newsite/web` قرار دهید.
    - مطمئن شوید `next.config.js` خروجی را روی `standalone` تنظیم کرده است.
+   - اگر از TypeScript استفاده می‌کنید، وابستگی‌های `typescript` و `@types/*` را به `package.json` اضافه کنید.
 4. **تعریف در زیرساخت (Kubernetes)**:
    - یک پوشه جدید در `k8s/sites/newsite` ایجاد کنید.
    - فایل‌های `kustomization.yaml` و پچ‌های مربوط به Namespace جدید را تعریف کنید.
