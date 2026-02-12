@@ -4,7 +4,7 @@ services:
   godvalley-web:
     build:
       context: ../services/godvalley/web
-      dockerfile: Dockerfile
+      dockerfile: ../../../docker/frontend-nextjs/Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -15,7 +15,10 @@ services:
   godvalley-core:
     build:
       context: ..
-      dockerfile: services/godvalley/apps/core/Dockerfile
+      dockerfile: docker/backend-actix/Dockerfile
+      args:
+        APP_NAME: godvalley-core
+        APP_PATH: services/godvalley/apps/core
     ports:
       - "8080:8080"
       - "50051:50051"
@@ -44,7 +47,7 @@ services:
   gcorp-web:
     build:
       context: ../services/gcorp.cc/web
-      dockerfile: Dockerfile
+      dockerfile: ../../../docker/frontend-nextjs/Dockerfile
     ports:
       - "3001:3000"
     environment:
@@ -53,14 +56,17 @@ services:
   gcorp-api:
     build:
       context: ..
-      dockerfile: services/gcorp.cc/apps/api/Dockerfile
+      dockerfile: docker/backend-actix/Dockerfile
+      args:
+        APP_NAME: gcorp-api
+        APP_PATH: services/gcorp.cc/apps/api
     ports:
       - "8081:8080"
 
   journa-web:
     build:
       context: ../services/journa/web
-      dockerfile: Dockerfile
+      dockerfile: ../../../docker/frontend-nextjs/Dockerfile
     ports:
       - "3002:3000"
     environment:
@@ -69,14 +75,17 @@ services:
   journa-api:
     build:
       context: ..
-      dockerfile: services/journa/apps/api/Dockerfile
+      dockerfile: docker/backend-actix/Dockerfile
+      args:
+        APP_NAME: journa-api
+        APP_PATH: services/journa/apps/api
     ports:
       - "8082:8080"
 
   cardiani-web:
     build:
       context: ../services/cardiani/web
-      dockerfile: Dockerfile
+      dockerfile: ../../../docker/frontend-nextjs/Dockerfile
     ports:
       - "3003:3000"
     environment:
@@ -85,14 +94,17 @@ services:
   cardiani-api:
     build:
       context: ..
-      dockerfile: services/cardiani/apps/api/Dockerfile
+      dockerfile: docker/backend-actix/Dockerfile
+      args:
+        APP_NAME: cardiani-api
+        APP_PATH: services/cardiani/apps/api
     ports:
       - "8083:8080"
 
   zeteb-web:
     build:
       context: ../services/zeteb/web
-      dockerfile: Dockerfile
+      dockerfile: ../../../docker/frontend-nextjs/Dockerfile
     ports:
       - "3004:3000"
     environment:
@@ -101,7 +113,10 @@ services:
   zeteb-api:
     build:
       context: ..
-      dockerfile: services/zeteb/apps/api/Dockerfile
+      dockerfile: docker/backend-actix/Dockerfile
+      args:
+        APP_NAME: zeteb-api
+        APP_PATH: services/zeteb/apps/api
     ports:
       - "8084:8080"
 

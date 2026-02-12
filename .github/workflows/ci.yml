@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        site: [gcorp.cc, cardiani, journa, zeteb]
+        site: [godvalley, gcorp.cc, cardiani, journa, zeteb]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Node
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        site: [gcorp, cardiani, journa, zeteb]
+        site: [godvalley, gcorp, cardiani, journa, zeteb]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
@@ -58,11 +58,23 @@ jobs:
         run: |
           site=${{ matrix.site }}
           path="services/$site"
+          app_name="$site-api"
           if [ "$site" == "gcorp" ]; then path="services/gcorp.cc"; fi
+
+          if [ "$site" == "godvalley" ]; then
+            app_path="services/godvalley/apps/core"
+            app_name="godvalley-core"
+          else
+            app_path="$path/apps/api"
+          fi
+
+          image_name="multi/$site-api:latest"
+          if [ "$site" == "godvalley" ]; then image_name="multi/godvalley-core:latest"; fi
+
           docker build \
-            --build-arg APP_PATH=$path/apps/api \
-            --build-arg APP_NAME=$site-api \
-            -t multi/$site-api:latest \
+            --build-arg APP_PATH=$app_path \
+            --build-arg APP_NAME=$app_name \
+            -t $image_name \
             -f docker/backend-actix/Dockerfile .
 
       - name: Build Web Image
