@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   godvalley-web:
     build:
@@ -31,14 +29,14 @@ services:
       - godvalley-scylla
 
   godvalley-redis:
-    image: redis:7.2-alpine
+    image: redis:8.4-alpine
     ports:
       - "6379:6379"
     volumes:
       - godvalley-redis-data:/data
 
   godvalley-scylla:
-    image: scylladb/scylla:6.3
+    image: scylladb/scylla
     ports:
       - "9042:9042"
     volumes:
